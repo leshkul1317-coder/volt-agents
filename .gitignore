@@ -8,6 +8,8 @@ node_modules/
 *.pem
 id_rsa*
 secrets.*
+id.txt
+id
 
 # ОС / редакторы
 .DS_Store

@@ -1,0 +1,39 @@
+name: Telegram отчёт о PR
+
+# Когда агент открывает Pull Request — шлём краткий отчёт в личку админам.
+# Токен бота хранится в секретах репозитория (Settings → Secrets → Actions):
+#   REPORT_BOT_TOKEN = токен бота URSANO WORK
+# ID админов — не секрет, заданы ниже в CHAT_IDS.
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram report
+        env:
+          TOKEN: ${{ secrets.REPORT_BOT_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          CHAT_IDS: "5145498774 1065030224"
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "REPORT_BOT_TOKEN не задан в секретах репозитория — пропускаю."
+            exit 0
+          fi
+          TEXT="✍️ ВОЛЬТ · новый отчёт агента
+
+*${PR_TITLE}*
+${PR_URL}"
+          for CHAT in $CHAT_IDS; do
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              --data-urlencode "chat_id=${CHAT}" \
+              --data-urlencode "text=${TEXT}" \
+              --data-urlencode "parse_mode=Markdown" \
+              --data-urlencode "disable_web_page_preview=true" > /dev/null
+          done
+          echo "Отчёт отправлен."
