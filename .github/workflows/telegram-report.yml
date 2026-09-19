@@ -25,10 +25,7 @@ jobs:
             echo "REPORT_BOT_TOKEN не задан в секретах репозитория — пропускаю."
             exit 0
           fi
-          TEXT="✍️ ВОЛЬТ · новый отчёт агента
-
-*${PR_TITLE}*
-${PR_URL}"
+          TEXT=$(printf '✍️ ВОЛЬТ · новый отчёт агента\n\n*%s*\n%s' "$PR_TITLE" "$PR_URL")
           for CHAT in $CHAT_IDS; do
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               --data-urlencode "chat_id=${CHAT}" \
